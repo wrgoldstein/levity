@@ -13,5 +13,5 @@ dimension "inserted_at" {
 
 dimension "inserted_on" {
     type = "date"
-    sql = "inserted_at::date"
+    sql = "features.inserted_at::date"
 }

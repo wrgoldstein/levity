@@ -8,7 +8,7 @@
         <%= for {kind, fields} <- Enum.group_by(fields, fn f -> f.k end) do %>  
           <%= for field <- fields do %>
             <div 
-              class={"field #{kind}"}
+              class={"field #{kind} #{status_class(field, @selected)}"}
               phx-click="click_field" 
               phx-value-view={view}
               phx-value-field_id={field.id}
@@ -22,12 +22,13 @@
   </div>
 
   <div style="display: flex; flex-direction: column">
-    <pre style="width: 40em; margin-right: 4em;">
-      <div id="sql" phx-hook="SQLFormatting" class="sql">
-        <%= @sql %>
-      </div>
-    </pre>
-
+    <div style="width: 40em; margin-right: 4em;">
+      <pre>
+        <div id="sql" phx-hook="SQLFormatting" class="sql">
+          <%= @formatted_sql %>
+        </div>
+      </pre>
+    </div>
 
     <div style="overflow: scroll;">
       <%= if @results do %>
@@ -48,6 +49,7 @@
         <%= @results.num_rows %> rows!
       <% end %>
     </div>
+    <div id="chart" phx-hook="chartData" style="width: 40em; height: 10em;"></div>
   </div>
 
   <button phx-click="run_query">Run</button>

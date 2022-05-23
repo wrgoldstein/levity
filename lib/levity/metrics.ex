@@ -1,4 +1,5 @@
 defmodule Field do
+  @derive Jason.Encoder
   defstruct [:v, :k, :t, :n, :s, :id]
 
   def new(view, kind, type, name, sql) do

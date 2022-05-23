@@ -11,6 +11,7 @@ defmodule LevityWeb.BaseLive.Index do
     socket 
     |> assign(:base, list_views())
     |> assign(:sql, "select some columns")
+    |> assign(:formatted_sql, "select some columns")
     |> assign(:results, nil)
     |> assign(:selected, %{})
     |> then(& {:ok, &1})
@@ -46,6 +47,10 @@ defmodule LevityWeb.BaseLive.Index do
   we send an event directly via `push_event/3` and allow a hook
   defined in `app.js` to intercept the event and do the formatting.
   """
+  def status_class(field, selected) do
+    if Map.has_key?(selected, field.id), do: "active", else: "inactive"
+  end
+
   def handle_event("click_field", %{"field_id" => field_id, "view" => view}, socket) do
     socket 
     |> toggle_field(view, field_id)
@@ -55,14 +60,26 @@ defmodule LevityWeb.BaseLive.Index do
        )
        assign(socket, :sql, sql)
        |> push_event("sql", %{sql: sql})
+       |> push_event("clear", %{})
     end)
+    |> assign(:results, nil)
     |> then(& {:noreply, &1})
   end
 
   def handle_event("run_query", _, socket) do
-    {:ok, pid} = Postgrex.start_link(hostname: "localhost", username: "postgres", password: "postgres", database: "post_checkout_survey_dev")
+    {:ok, pid} = Postgrex.start_link(hostname: "localhost", username: "postgres", password: "postgres", database: "local_prod")
     results = Postgrex.query!(pid, socket.assigns.sql, [])
     {:noreply, assign(socket, :results, results)}
+    socket
+    |> assign(:results, results)
+    |> push_event("results", %{fields: Map.values(socket.assigns.selected), columns: results.columns, rows: results.rows})
+    |> then(& {:noreply, &1})
+  end
+
+  def handle_event("format_sql", %{"sql" => sql}, socket) do
+    socket
+    |> assign(:formatted_sql, sql)
+    |> then(& {:noreply, &1})
   end
 
   def toggle_field(socket, view, field_id) do

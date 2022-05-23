@@ -139,6 +139,12 @@
   background: #0069d9;
 }
 
+.field {
+  padding-left: 2px;
+  border-radius: 2px;
+  user-select: none;
+}
+
 .field:hover {
   cursor: pointer;
 }
@@ -149,4 +155,8 @@
 
 .view {
   margin-bottom: 1em;
+}
+
+.active {
+  background-color: aliceblue;
 }

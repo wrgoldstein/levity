@@ -26,6 +26,7 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
+import * as Plot from "@observablehq/plot";
 import { format } from 'sql-formatter';
 
 window.format = format
@@ -35,10 +36,33 @@ Hooks.SQLFormatting = {
   mounted() {
      this.handleEvent("sql", ({sql}) => {
         const d = document.getElementById("sql")
-        d.innerHTML = format(sql)
+        this.pushEvent("format_sql", {sql: format(sql).replace(":: ", "::")})
      })
   }
 }
+
+Hooks.chartData = {
+    mounted() {
+       this.handleEvent("clear", () => {
+            const d = document.getElementById("chart")
+            d.innerHTML = ''
+       })
+       this.handleEvent("results", ({fields, columns, rows}) => {
+        const d = document.getElementById("chart")
+        d.innerHTML = ''
+        if (columns.length != 2) return
+        const plot = Plot.plot({
+            marks: [
+              Plot.barY(rows, {x: d => d[0] || "null", y: d => d[1] , fill: "steelblue"}),
+              Plot.ruleY([0])
+            ],
+            tickRotate: "90",
+            height: "240"
+          })
+          d.appendChild(plot)
+       })
+    }
+  }
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}, hooks: Hooks})
@@ -56,4 +80,3 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
-
