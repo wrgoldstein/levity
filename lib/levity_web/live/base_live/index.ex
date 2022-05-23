@@ -38,8 +38,15 @@ defmodule LevityWeb.BaseLive.Index do
     Metrics.get_base("shops")
   end
 
+  @doc """
+  When a field is clicked in the UI, the field is either added to or
+  removed from the selection.
+
+  NOTE: In order to allow a javascript library to format the SQL,
+  we send an event directly via `push_event/3` and allow a hook
+  defined in `app.js` to intercept the event and do the formatting.
+  """
   def handle_event("click_field", %{"field_id" => field_id, "view" => view}, socket) do
-    # toggle the field
     socket 
     |> toggle_field(view, field_id)
     |> then(fn socket ->
