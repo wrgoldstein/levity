@@ -1,0 +1,25 @@
+view "customers" {
+    dimension "customer_id" {
+        type = "string"
+    }
+
+    dimension "first_name" {
+        type = "string"
+    }
+
+    dimension "last_name" {
+        type = "string"
+    }
+
+    dimension "first_order" {
+        type = "string"
+    }
+
+    dimension "most_recent_order" {
+        type = "string"
+    }
+
+    dimension "number_of_orders" {
+        type = "number"
+    }
+}
