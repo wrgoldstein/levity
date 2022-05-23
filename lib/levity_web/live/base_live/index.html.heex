@@ -1,24 +1,20 @@
 <h1>Base</h1>
 
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-
-      <th></th>
-    </tr>
-  </thead>
-  <tbody id="bases">
+<div style="display: flex; flex-direction: row;">
+  <nav>
     <%= for {"view", view} <- @bases do %>
+      <span>Name</span>
       <%= for {name, fields} <- view do %>
         <%= for {field_name, %{"type" => type}} <- fields["dimension"] do %>
         <tr id={"base-#{name}"}>
-          <td><%= field_name   %></td>
+          <div><%= field_name   %></div>
         </tr>
         <% end %>
       <% end %>
     <% end %>    
-      <%= %>
-      
-  </tbody>
-</table>
+  </nav>
+
+  <div>
+    Plots go here
+  </div>
+</div>
