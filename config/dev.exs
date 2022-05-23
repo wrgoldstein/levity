@@ -2,7 +2,7 @@ import Config
 
 # Configure your database
 config :levity, Levity.Repo,
-  database: "levity.db"
+  database: "db/levity.db"
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
