@@ -12,6 +12,9 @@ defmodule Levity.Application do
       Levity.Repo,
       # Start the Telemetry supervisor
       LevityWeb.Telemetry,
+
+      Levity.Metrics.Watcher,
+      {Registry, [keys: :duplicate, name: Levity.Registry]},
       # Start the PubSub system
       {Phoenix.PubSub, name: Levity.PubSub},
       # Start the Endpoint (http/https)

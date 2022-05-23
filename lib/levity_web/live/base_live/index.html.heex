@@ -1,0 +1,24 @@
+<h1>Base</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="bases">
+    <%= for {"view", view} <- @bases do %>
+      <%= for {name, fields} <- view do %>
+        <%= for {field_name, %{"type" => type}} <- fields["dimension"] do %>
+        <tr id={"base-#{name}"}>
+          <td><%= field_name   %></td>
+        </tr>
+        <% end %>
+      <% end %>
+    <% end %>    
+      <%= %>
+      
+  </tbody>
+</table>

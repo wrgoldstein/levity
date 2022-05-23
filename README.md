@@ -1,19 +1,20 @@
 # Levity
 
-To start your Phoenix server:
+Thoughts on how this improves on frivolity and cookie
 
-  * Install dependencies with `mix deps.get`
-  * Create and migrate your database with `mix ecto.setup`
-  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+1. elixir over python
+2. sticking to hcl for now
+3. state is entirely server side :-o
+4. updating metrics is reflected with hot reload [x] !!!
+4. ```
+  Path.wildcard("metrics/*.*")
+  |> Enum.map(&File.read!/1)
+  |> Enum.join("\n")
+  |> HXL.decode!()
+  |> :erlang.term_to_binary()
+  |> Base.encode64()
+  |> String.length
+  ```
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## Learn more
-
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+5. 
