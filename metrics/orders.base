@@ -1,0 +1,7 @@
+
+view = "orders"
+
+join "customers" {
+    sql = "customers.customer_id = orders.customer_id"
+}
+

@@ -119,6 +119,33 @@
   100% { opacity: 0; }
 }
 
-nav {
-  width: 30em;
+
+.sidebar {
+  padding: 1em;
+  padding-right: 5em;
+  max-width: 60em;
+  overflow-y: scroll;
+  margin-right: 2em;
+  box-sizing: content-box;
+}
+
+::-webkit-scrollbar {
+  width: 0;  /* Remove scrollbar space */
+  background: transparent;  /* Optional: just make scrollbar invisible */
+}
+/* Optional: show position indicator in red */
+::-webkit-scrollbar-thumb {
+  background: #FF0000;
+}
+
+.field:hover {
+  cursor: pointer;
+}
+
+.measure {
+  color: orange;
+}
+
+.view {
+  margin-bottom: 1em;
 }

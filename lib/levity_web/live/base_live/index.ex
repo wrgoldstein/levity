@@ -8,7 +8,11 @@ defmodule LevityWeb.BaseLive.Index do
   def mount(_params, _session, socket) do
     PubSub.subscribe(Levity.PubSub, "filesystem")
     # Registry.register(Levity.Registry, "liveview", self())
-    {:ok, assign(socket, :bases, list_bases())}
+    socket 
+    |> assign(:base, list_views())
+    |> assign(:sql, "select some columns")
+    |> assign(:selected, %{})
+    |> then(& {:ok, &1})
   end
 
 
@@ -29,13 +33,35 @@ defmodule LevityWeb.BaseLive.Index do
     socket
   end
 
-  defp list_bases do
-    {:ok, metrics} = HXL.decode_file("metrics/customers.view")
-    metrics
+  defp list_views do
+    Metrics.get_base("orders")
+  end
+
+  def handle_event("click_field", %{"field_id" => field_id, "view" => view}, socket) do
+    # toggle the field
+    socket 
+    |> toggle_field(view, field_id)
+    |> then(fn socket ->
+       assign(socket, :sql, Metrics.construct_query(
+        socket.assigns.base, Map.values(socket.assigns.selected)
+       ))
+    end)
+    |> then(& {:noreply, &1})
+  end
+
+  def toggle_field(socket, view, field_id) do
+    if field_id in Map.keys(socket.assigns.selected) do
+      assign(socket, :selected, Map.delete(socket.assigns.selected, field_id))
+    else
+     field = Enum.find(socket.assigns.base["views"], fn {v, _} -> v == view end)
+      |> then(fn {_view, fields} -> fields end)
+      |> Enum.find(fn field -> field.id == field_id end)
+
+      assign(socket, :selected, Map.put(socket.assigns.selected, field_id, field))
+    end
   end
 
   def handle_info({:metrics, metrics}, socket) do
-    for base <- metrics, do: IO.inspect(base)
     {:noreply, assign(socket, :bases, metrics)}
   end
 end

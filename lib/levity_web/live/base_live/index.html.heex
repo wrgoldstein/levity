@@ -1,20 +1,31 @@
 <h1>Base</h1>
 
 <div style="display: flex; flex-direction: row;">
-  <nav>
-    <%= for {"view", view} <- @bases do %>
-      <span>Name</span>
-      <%= for {name, fields} <- view do %>
-        <%= for {field_name, %{"type" => type}} <- fields["dimension"] do %>
-        <tr id={"base-#{name}"}>
-          <div><%= field_name   %></div>
-        </tr>
+  <div class="sidebar">
+    <%= for {view, fields} <- @base["views"] do %>
+      <div class="view">
+        <strong><%= view %> </strong>
+        <%= for {kind, fields} <- Enum.group_by(fields, fn f -> f.k end) do %>  
+          <%= for field <- fields do %>
+            <div 
+              class={"field #{kind}"}
+              phx-click="click_field" 
+              phx-value-view={view}
+              phx-value-field_id={field.id}
+            >
+                <%= String.replace(field.n, "_", " ")   %>
+            </div>
+          <% end %>
         <% end %>
-      <% end %>
-    <% end %>    
-  </nav>
-
-  <div>
-    Plots go here
+      </div>
+    <% end %>
   </div>
+
+  <div style="display: flex; flex-direction: column">
+    <pre style="width: 40em; margin-right: 4em;">
+      <%= @sql %>
+    </pre>
+  </div>
+
+  <button>Run</button>
 </div>
