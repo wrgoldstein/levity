@@ -1,0 +1,10 @@
+
+view = "shops"
+
+join "features" {
+    sql = "shops.id = features.shop_id"
+}
+
+join "questions" {
+    sql = "shops.id = questions.shop_id"
+}

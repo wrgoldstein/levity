@@ -1,0 +1,17 @@
+dimension "feature_flag" {
+    type = "string"
+    sql = "features.id"
+}
+
+dimension "shop_id" {
+    type = "string"
+}
+
+dimension "inserted_at" {
+    type = "timestamp"
+}
+
+dimension "inserted_on" {
+    type = "date"
+    sql = "inserted_at::date"
+}

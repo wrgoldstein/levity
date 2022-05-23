@@ -1,0 +1,35 @@
+dimension "name" {
+    type = "string"
+}
+
+dimension "is_uninstalled" {
+    type = "boolean"
+    sql = "uninstalled_at is not null"
+}
+
+dimension "plan_name" {
+    type = "string"
+}
+
+dimension "inserted_at" {
+    type = "timestamp"
+}
+
+dimension "updated_at" {
+    type = "timestamp"
+}
+
+dimension "qs_status" {
+    type = "string"
+    sql = "case when exists(select 1 from features where id in ('question_stream_only', 'question_streams') and shop_id = shops.id) then 'qs' when exists(select 1 from features where id in ('admin_question_streams') and shop_id = shops.id) then 'admin_qs' else 'not_qs' end"
+}
+
+dimension "admin_question_streams" {
+    type = "boolean"
+    sql = "exists(select 1 from features where shop_id = shops.id)"
+}
+
+measure "count_shops" {
+    type = "number"
+    sql = "count(distinct shops.id)"
+}

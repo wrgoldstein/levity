@@ -23,9 +23,32 @@
 
   <div style="display: flex; flex-direction: column">
     <pre style="width: 40em; margin-right: 4em;">
-      <%= @sql %>
+      <div id="sql" phx-hook="SQLFormatting" class="sql">
+        <%= @sql %>
+      </div>
     </pre>
+
+
+    <div style="overflow: scroll;">
+      <%= if @results do %>
+        <table>
+          <tr>
+            <%= for column <- @results.columns do %>
+              <th><%= column %></th>
+            <% end %>
+          </tr>
+          <%= for row <- @results.rows do %>
+            <tr>
+            <%= for cell <- row do %>
+              <td> <%= cell  %> </td>
+            <% end %>  
+            </tr>
+          <% end %>
+        </table>
+        <%= @results.num_rows %> rows!
+      <% end %>
+    </div>
   </div>
 
-  <button>Run</button>
+  <button phx-click="run_query">Run</button>
 </div>

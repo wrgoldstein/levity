@@ -1,0 +1,8 @@
+dimension "prompt" {
+    type = "string"
+}
+
+measure "count_questions" {
+    type = "number"
+    sql = "count(distinct questions.id)"
+}

@@ -11,6 +11,7 @@ defmodule LevityWeb.BaseLive.Index do
     socket 
     |> assign(:base, list_views())
     |> assign(:sql, "select some columns")
+    |> assign(:results, nil)
     |> assign(:selected, %{})
     |> then(& {:ok, &1})
   end
@@ -34,7 +35,7 @@ defmodule LevityWeb.BaseLive.Index do
   end
 
   defp list_views do
-    Metrics.get_base("orders")
+    Metrics.get_base("shops")
   end
 
   def handle_event("click_field", %{"field_id" => field_id, "view" => view}, socket) do
@@ -42,11 +43,19 @@ defmodule LevityWeb.BaseLive.Index do
     socket 
     |> toggle_field(view, field_id)
     |> then(fn socket ->
-       assign(socket, :sql, Metrics.construct_query(
+       sql = Metrics.construct_query(
         socket.assigns.base, Map.values(socket.assigns.selected)
-       ))
+       )
+       assign(socket, :sql, sql)
+       |> push_event("sql", %{sql: sql})
     end)
     |> then(& {:noreply, &1})
+  end
+
+  def handle_event("run_query", _, socket) do
+    {:ok, pid} = Postgrex.start_link(hostname: "localhost", username: "postgres", password: "postgres", database: "post_checkout_survey_dev")
+    results = Postgrex.query!(pid, socket.assigns.sql, [])
+    {:noreply, assign(socket, :results, results)}
   end
 
   def toggle_field(socket, view, field_id) do

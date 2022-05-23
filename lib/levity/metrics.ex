@@ -20,7 +20,7 @@ defmodule Field do
 
   def get_sql(field) do
     if field.s do
-      "#{field.s} as #{field.v}.#{field.n}"
+      "#{field.s} as #{field.n}"
     else
       "#{field.v}.#{field.n}"
     end
@@ -65,7 +65,6 @@ defmodule Levity.Metrics do
 
     joins =
       Enum.reduce(fields, MapSet.new(), fn f, acc -> MapSet.put(acc, f.v) end)
-      |> Kernel.tap(& IO.inspect(&1, label: "in here"))
       |> Enum.filter(& &1 != root)
       |> Enum.map(fn view ->
         %{"sql" => sql} = base["join"][view]
@@ -87,10 +86,10 @@ defmodule Levity.Metrics do
       |> then(fn g ->
         if Enum.any?(g) && Enum.any?(measures) do
           columns = Enum.join(g, ", ")
-          "\ngroup by #{columns}"
+          "group by #{columns}"
         end
       end)
 
-    "select \n#{select}\nfrom #{root} #{joins} #{grouping}"
+    "select #{select} from #{root} #{joins} #{grouping}"
   end
 end
