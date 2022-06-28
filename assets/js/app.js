@@ -22,53 +22,68 @@ import "../css/app.css"
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import "phoenix_html"
 // Establish Phoenix Socket and LiveView configuration.
-import {Socket} from "phoenix"
-import {LiveSocket} from "phoenix_live_view"
+import { Socket } from "phoenix"
+import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
 import * as Plot from "@observablehq/plot";
+import Alpine from 'alpinejs'
+
+window.Alpine = Alpine
+ 
+Alpine.start()
+
 import { format } from 'sql-formatter';
 
 window.format = format
 
 let Hooks = {}
 Hooks.SQLFormatting = {
-  mounted() {
-     this.handleEvent("sql", ({sql}) => {
-        const d = document.getElementById("sql")
-        this.pushEvent("format_sql", {sql: format(sql).replace(":: ", "::")})
-     })
-  }
+    mounted() {
+        this.handleEvent("sql", ({ sql }) => {
+            const d = document.getElementById("sql")
+            this.pushEvent("format_sql", { sql: format(sql).replace(":: ", "::") })
+        })
+    }
 }
 
 Hooks.chartData = {
     mounted() {
-       this.handleEvent("clear", () => {
+        this.handleEvent("clear", () => {
             const d = document.getElementById("chart")
             d.innerHTML = ''
-       })
-       this.handleEvent("results", ({fields, columns, rows}) => {
-        const d = document.getElementById("chart")
-        d.innerHTML = ''
-        if (columns.length != 2) return
-        const plot = Plot.plot({
-            marks: [
-              Plot.barY(rows, {x: d => d[0] || "null", y: d => d[1] , fill: "steelblue"}),
-              Plot.ruleY([0])
-            ],
-            tickRotate: "90",
-            height: "240"
-          })
-          d.appendChild(plot)
-       })
+        })
+        this.handleEvent("results", ({ fields, columns, rows }) => {
+            console.log({ fields, columns, rows })
+            window.Plot = Plot
+            window.rows = rows
+            const d = document.getElementById("chart")
+            d.innerHTML = ''
+            if (columns.length != 2) return
+            const plot = Plot.plot({
+                marks: [
+                    Plot.barX(rows, { y: d => d[0] || "null", x: d => d[1], fill: "steelblue" }),
+                    Plot.ruleY([0])
+                ],
+                tickRotate: "90",
+                marginLeft: 130
+            })
+            d.appendChild(plot)
+        })
     }
-  }
+}
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}, hooks: Hooks})
+let liveSocket = new LiveSocket("/live", Socket, {
+    params: { _csrf_token: csrfToken }, hooks: Hooks, dom: {
+        onBeforeElUpdated(from, to) {
+            if (from._x_dataStack) { window.Alpine.clone(from, to) }
+        }
+    },
+})
 
 // Show progress bar on live navigation and form submits
-topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
+topbar.config({ barColors: { 0: "#29d" }, shadowColor: "rgba(0, 0, 0, .3)" })
 window.addEventListener("phx:page-loading-start", info => topbar.show())
 window.addEventListener("phx:page-loading-stop", info => topbar.hide())
 

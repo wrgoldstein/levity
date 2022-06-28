@@ -21,16 +21,20 @@
     <% end %>
   </div>
 
-  <div style="display: flex; flex-direction: column">
-    <div style="width: 40em; margin-right: 4em;">
+  <div x-data="{selected: 1, select(a){ this.selected = a}, is_selected(a){return this.selected == a} }" style="display: flex; flex-direction: column; max-width: 60em; width: calc(100vw - 23em);">
+    <div class="tabs" style="margin-bottom: 1em;">
+      <div :class="is_selected(1) ? 'is-tab-selected' : ''" class="tab" @click="() => select(1)">SQL</div>
+      <div :class="is_selected(2) ? 'is-tab-selected' : ''" class="tab" @click="() => select(2)">Data</div>
+      <div :class="is_selected(3) ? 'is-tab-selected' : ''" class="tab" @click="() => select(3)">Chart</div>
+    </div>
+    <div x-show="() => is_selected(1)" style="max-width: 60em; width: calc(100vw - 20em); margin-right: 4em;">
       <pre>
-        <div id="sql" phx-hook="SQLFormatting" class="sql">
+        <div id="sql" phx-hook="SQLFormatting" class="sql" style="width: 100%">
           <%= @formatted_sql %>
         </div>
       </pre>
     </div>
-
-    <div style="overflow: scroll;">
+    <div x-show="() => is_selected(2)" style="width: 100%; margin-right: 4em; overflow: scroll">
       <%= if @results do %>
         <table>
           <tr>
@@ -38,7 +42,7 @@
               <th><%= column %></th>
             <% end %>
           </tr>
-          <%= for row <- @results.rows do %>
+          <%= for row <- Enum.take(@results.rows, 20) do %>
             <tr>
             <%= for cell <- row do %>
               <td> <%= cell  %> </td>
@@ -46,11 +50,17 @@
             </tr>
           <% end %>
         </table>
-        <%= @results.num_rows %> rows!
+        <%= if Enum.count(@results.rows) > 20 do %>
+          <%= @results.num_rows - 20 %> rows omitted
+        <% end %>
+        
       <% end %>
     </div>
-    <div id="chart" phx-hook="chartData" style="width: 40em; height: 10em;"></div>
-  </div>
 
+    <div x-show="() => is_selected(3)" style="width: 100%; margin-right: 4em;">
+      <div id="chart" phx-hook="chartData" style="width: 100%; height: 10em;"></div>
+    </div>
+  </div>
   <button phx-click="run_query">Run</button>
 </div>
+

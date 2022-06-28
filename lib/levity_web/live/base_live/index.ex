@@ -5,11 +5,12 @@ defmodule LevityWeb.BaseLive.Index do
   alias Phoenix.PubSub
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(%{"base" => base_id}, _session, socket) do
     PubSub.subscribe(Levity.PubSub, "filesystem")
     # Registry.register(Levity.Registry, "liveview", self())
     socket 
-    |> assign(:base, list_views())
+    |> assign(:base_id, base_id)
+    |> assign(:base, Metrics.get_base(base_id))
     |> assign(:sql, "select some columns")
     |> assign(:formatted_sql, "select some columns")
     |> assign(:results, nil)
@@ -33,10 +34,6 @@ defmodule LevityWeb.BaseLive.Index do
 
   defp apply_action(socket, :index, _params) do
     socket
-  end
-
-  defp list_views do
-    Metrics.get_base("shops")
   end
 
   @doc """
@@ -80,7 +77,7 @@ defmodule LevityWeb.BaseLive.Index do
     socket
     |> assign(:formatted_sql, sql)
     |> then(& {:noreply, &1})
-  end
+  end 
 
   def toggle_field(socket, view, field_id) do
     if field_id in Map.keys(socket.assigns.selected) do
@@ -98,3 +95,4 @@ defmodule LevityWeb.BaseLive.Index do
     {:noreply, assign(socket, :bases, metrics)}
   end
 end
+

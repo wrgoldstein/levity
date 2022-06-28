@@ -18,7 +18,7 @@ defmodule LevityWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
-    live "/bases", BaseLive.Index, :index
+    live "/bases/:base", BaseLive.Index, :index
   end
 
   # Other scopes may use custom stacks.

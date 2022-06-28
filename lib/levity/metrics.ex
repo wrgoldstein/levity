@@ -19,11 +19,15 @@ defmodule Field do
     |> String.slice(0, 10)
   end
 
+  def get_qualified(field) do
+    "#{field.v}.#{field.n}"
+  end
+
   def get_sql(field) do
     if field.s do
-      "#{field.s} as #{field.n}"
+      "#{field.s} as \"#{get_qualified(field)}\""
     else
-      "#{field.v}.#{field.n}"
+      get_qualified(field)
     end
   end
 end
@@ -83,7 +87,7 @@ defmodule Levity.Metrics do
     measures = Enum.filter(fields, &(&1.k == "measure"))
     grouping =
       Enum.filter(fields, &(&1.k == "dimension"))
-      |> Enum.map(& &1.n)
+      |> Enum.map(& "\"#{Field.get_qualified(&1)}\"")
       |> then(fn g ->
         if Enum.any?(g) && Enum.any?(measures) do
           columns = Enum.join(g, ", ")

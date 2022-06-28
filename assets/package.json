@@ -1,8 +1,17 @@
 {
+  "type": "module",
   "dependencies": {
     "@observablehq/plot": "^0.4.3",
+    "alpinejs": "^3.10.2",
     "d3-scale-chromatic": "^3.0.0",
     "d3-selection": "^3.0.0",
-    "sql-formatter": "^6.1.1"
+    "mgplus": "^1.0.61",
+    "mocha": "^10.0.0",
+    "sql-formatter": "^6.1.1",
+    "tailwind": "^2.2.0",
+    "vega-lite": "^5.2.0"
+  },
+  "scripts": {
+    "test": "mocha --experimental-modules"
   }
 }
