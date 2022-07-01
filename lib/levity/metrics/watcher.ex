@@ -3,8 +3,6 @@ defmodule Levity.Metrics.Watcher do
   We could have this server watch for changes 
   """
   use GenServer
-
-  alias Phoenix.LiveView
   
 
   def start_link(_args) do
@@ -17,13 +15,13 @@ defmodule Levity.Metrics.Watcher do
     {:ok, %{watcher_pid: watcher_pid}}
   end
 
-  def handle_info({:register_liveview, pid}, %{liveviews: liveviews} = state) do
+  def handle_info({:register_liveview, pid}, %{liveviews: liveviews} = _state) do
     # Your own logic for path and events
     IO.puts "registered a pid!"
     {:noreply, %{liveviews: [pid | liveviews]}}
   end
 
-  def handle_info({:file_event, watcher_pid, {path, events}}, %{watcher_pid: watcher_pid} = state) do
+  def handle_info({:file_event, watcher_pid, {path, _events}}, %{watcher_pid: watcher_pid} = state) do
     # Your own logic for path and events
     case HXL.decode_file(path) do
       {:ok, updated_metric_defs} ->

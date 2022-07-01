@@ -1,9 +1,9 @@
 defmodule Field do
   @derive Jason.Encoder
-  defstruct [:v, :k, :t, :n, :s, :id]
+  defstruct [:v, :k, :t, :n, :s, :q, :id]
 
   def new(view, kind, type, name, sql) do
-    %Field{
+    f = %Field{
       v: view,
       k: kind,
       t: type,
@@ -11,6 +11,7 @@ defmodule Field do
       s: sql,
       id: make_id(view, kind, type, name)
     }
+    Map.put(f, :q, get_qualified(f))
   end
 
   def make_id(v, k, t, n) do
@@ -20,14 +21,18 @@ defmodule Field do
   end
 
   def get_qualified(field) do
-    "#{field.v}.#{field.n}"
+   "#{field.v}.#{field.n}"
+  end
+
+  def get_qualified_as_qualifier(field) do
+    "\"#{field.v}.#{field.n}\""
   end
 
   def get_sql(field) do
     if field.s do
-      "#{field.s} as \"#{get_qualified(field)}\""
+      "#{field.s} as #{get_qualified_as_qualifier(field)}"
     else
-      get_qualified(field)
+      "#{get_qualified(field)} as #{get_qualified_as_qualifier(field)}"
     end
   end
 end
@@ -63,7 +68,7 @@ defmodule Levity.Metrics do
     |> then(& {view_id, List.flatten(&1)})
   end
 
-  def construct_query(base, []), do: "select some columns"
+  def construct_query(_base, []), do: "select some columns"
 
   def construct_query(base, fields) do
     root = base["view"]
@@ -76,18 +81,16 @@ defmodule Levity.Metrics do
         "\n  left join #{view} on \n    #{sql}"
       end)
 
-    select =
-      Enum.sort_by(fields, & {&1.k, &1.v, &1.n})
+    field_order = Enum.sort_by(fields, & {&1.k, &1.v, &1.n})
+    select = field_order
       |> Enum.map(fn f -> Field.get_sql(f) end)
       |> Enum.map(&"  #{&1}")
       |> Enum.join(",\n")
 
-    count_dimensions = Enum.count(fields, &(&1.k == "dimension"))
-
     measures = Enum.filter(fields, &(&1.k == "measure"))
     grouping =
       Enum.filter(fields, &(&1.k == "dimension"))
-      |> Enum.map(& "\"#{Field.get_qualified(&1)}\"")
+      |> Enum.map(&Field.get_qualified_as_qualifier/1)
       |> then(fn g ->
         if Enum.any?(g) && Enum.any?(measures) do
           columns = Enum.join(g, ", ")
@@ -95,6 +98,6 @@ defmodule Levity.Metrics do
         end
       end)
 
-    "select #{select} from #{root} #{joins} #{grouping}"
+    {field_order, "select #{select} from #{root} #{joins} #{grouping}"}
   end
 end

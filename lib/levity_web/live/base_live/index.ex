@@ -4,7 +4,6 @@ defmodule LevityWeb.BaseLive.Index do
   alias Levity.Metrics
   alias Phoenix.PubSub
 
-  @impl true
   def mount(%{"base" => base_id}, _session, socket) do
     PubSub.subscribe(Levity.PubSub, "filesystem")
     # Registry.register(Levity.Registry, "liveview", self())
@@ -19,12 +18,11 @@ defmodule LevityWeb.BaseLive.Index do
   end
 
 
-  @impl true
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  defp apply_action(socket, :edit, %{"id" => id}) do
+  defp apply_action(socket, :edit, %{"id" => _id}) do
     socket
   end
 
@@ -49,27 +47,31 @@ defmodule LevityWeb.BaseLive.Index do
   end
 
   def handle_event("click_field", %{"field_id" => field_id, "view" => view}, socket) do
-    socket 
-    |> toggle_field(view, field_id)
-    |> then(fn socket ->
-       sql = Metrics.construct_query(
+    socket = toggle_field(socket, view, field_id)
+    {field_order, sql} = Metrics.construct_query(
         socket.assigns.base, Map.values(socket.assigns.selected)
-       )
-       assign(socket, :sql, sql)
-       |> push_event("sql", %{sql: sql})
-       |> push_event("clear", %{})
-    end)
-    |> assign(:results, nil)
+    )
+
+    socket
+    |> assign(:sql, sql)
+    |> assign(:field_order, field_order)
+    |> push_event("sql", %{sql: sql})
+    |> push_event("clear", %{})
     |> then(& {:noreply, &1})
   end
 
   def handle_event("run_query", _, socket) do
     {:ok, pid} = Postgrex.start_link(hostname: "localhost", username: "postgres", password: "postgres", database: "local_prod")
     results = Postgrex.query!(pid, socket.assigns.sql, [])
+    # hack hack hack
+    rows = result.rows
+    |> Enum.with_index()
+    |> Enum.map(fn {row, i} -> [i | row] end)
+    
     {:noreply, assign(socket, :results, results)}
     socket
     |> assign(:results, results)
-    |> push_event("results", %{fields: Map.values(socket.assigns.selected), columns: results.columns, rows: results.rows})
+    |> push_event("results", %{fields: socket.assigns.field_order, columns: results.columns, rows: rows})
     |> then(& {:noreply, &1})
   end
 
